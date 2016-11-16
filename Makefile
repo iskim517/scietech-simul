@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=gnu++11 -O2 -g
+CXXFLAGS = -std=gnu++11 -O2 -g -Wall
 LDFLAGS = 
 
 all : simul
