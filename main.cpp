@@ -63,7 +63,7 @@ int idx(int i, int j, int off) {
         cout << "call readTextMap to set map_" <<endl;;
         return -1;
     }
-    return j + (i-1)*w + off;
+    return j-1 + (i-1)*w + off;
 }
 void setGraph (int map_[height][width], int off) {
     for (int i=1; i<=h; i++) {
