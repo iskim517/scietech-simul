@@ -11,6 +11,11 @@ int map8 [height][width], map7[height][width];
 int h, w; // 직사각형 꼴의 map이 입력된다고 가정하고 map의 실제 h와 w를 readTextMap에서 계산
 vector<pair<int,int> > g[width*height*2]; // graph
 
+const int WALL = 0;
+const int BLANK = 1;
+const int PERSON = 2;
+const int STAIRS = 3;
+
 // testfile에서 map을 읽어 2d-array에 저장
 void readTextMap (int map_[height][width], string fileName) {
     string line;
@@ -23,14 +28,14 @@ void readTextMap (int map_[height][width], string fileName) {
             for(char& c : line) {
                 w++;
                 if (c==' ')
-                    map_[h][w] = 1;
+                    map_[h][w] = BLANK;
                 else if (c=='.')
-                    map_[h][w] = 2;
+                    map_[h][w] = PERSON;
                 else if (c=='#')
-                    map_[h][w] = 0;
+                    map_[h][w] = WALL;
                 else if (c=='X') {
                     cout << "stair at (" << w << "," << h << ")" << endl; // print as (x,y) foramt
-                    map_[h][w] = 3;
+                    map_[h][w] = STAIRS;
                 }
                 else
                     cout << "unexpected character at (" << w << "," << h << ")" << endl;
@@ -65,12 +70,12 @@ void setGraph (int map_[height][width], int off) {
     for (int i=1; i<h; i++) {
         for (int j=1; j<w; j++) {
             // if horizontally connected
-            if (map_[i][j]>0 && map_[i][j+1]>0) {
+            if (map_[i][j]!=WALL && map_[i][j+1]!=WALL) {
                 g[idx(i,j,off)].push_back(make_pair(idx(i,j+1,off),1));
                 g[idx(i,j+1,off)].push_back(make_pair(idx(i,j,off),1));
             }
             // if vertically connected
-            if (map_[i][j]>0 && map_[i+1][j]>0) {
+            if (map_[i][j]!=WALL && map_[i+1][j]!=WALL) {
                 g[idx(i,j,off)].push_back(make_pair(idx(i+1,j,off),1));
                 g[idx(i+1,j,off)].push_back(make_pair(idx(i,j,off),1));
             }
