@@ -67,15 +67,15 @@ int idx(int i, int j, int off) {
     return j + (i-1)*w + off;
 }
 void setGraph (int map_[height][width], int off) {
-    for (int i=1; i<h; i++) {
-        for (int j=1; j<w; j++) {
+    for (int i=1; i<=h; i++) {
+        for (int j=1; j<=w; j++) {
             // if horizontally connected
-            if (map_[i][j]!=WALL && map_[i][j+1]!=WALL) {
+            if (j<w && map_[i][j]!=WALL && map_[i][j+1]!=WALL) {
                 g[idx(i,j,off)].push_back(make_pair(idx(i,j+1,off),1));
                 g[idx(i,j+1,off)].push_back(make_pair(idx(i,j,off),1));
             }
             // if vertically connected
-            if (map_[i][j]!=WALL && map_[i+1][j]!=WALL) {
+            if (i<h && map_[i][j]!=WALL && map_[i+1][j]!=WALL) {
                 g[idx(i,j,off)].push_back(make_pair(idx(i+1,j,off),1));
                 g[idx(i+1,j,off)].push_back(make_pair(idx(i,j,off),1));
             }
