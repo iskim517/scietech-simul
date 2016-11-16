@@ -4,7 +4,6 @@
 #include <vector>
 using namespace std;
 
-const int sz = 50000; // # of nodes
 const int width = 1000; // width of map
 const int height = 500; // height of map
 int map8 [height][width], map7[height][width];
