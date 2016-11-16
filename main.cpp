@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <fstream>
 #include <vector>
+#include "dijkstra.h"
 using namespace std;
 
 const int width = 1000; // width of map
@@ -9,6 +10,8 @@ const int height = 500; // height of map
 int map8 [height][width], map7[height][width];
 int h, w; // 직사각형 꼴의 map이 입력된다고 가정하고 map의 실제 h와 w를 readTextMap에서 계산
 vector<pair<int,int> > g[width*height*2]; // graph
+vector<int> exits, shortest;
+int peoplecnt;
 
 const int WALL = 0;
 const int BLANK = 1;
@@ -28,8 +31,9 @@ void readTextMap (int map_[height][width], string fileName) {
                 w++;
                 if (c==' ')
                     map_[h][w] = BLANK;
-                else if (c=='.')
-                    map_[h][w] = PERSON;
+                else if (c=='.') {
+                    map_[h][w] = PERSON; peoplecnt++;
+                }
                 else if (c=='#')
                     map_[h][w] = WALL;
                 else if (c=='X') {
@@ -119,6 +123,71 @@ int main () {
     setGraph(map7, offset);
     cout << " - build edges of stairs - " << endl;
     setStair("stair.txt", offset);
+
+    // assume the staris of 7th floor are exits
+    for (int i = 1; i <= h; i++)
+    {
+        for (int j = 1; j <= w; j++)
+        {
+            if (map7[i][j] == STAIRS)
+            {
+                exits.push_back(idx(i,j,w*h));
+            }
+        }
+    }
+
+    shortest.resize(exits.size(), 2e9);
+
+    printf("the number of people: %d\n", peoplecnt);
+
+    for (int i = 0; i < exits.size(); i++)
+    {
+        auto res = dijkstra(g, w*h*2, exits[i]);
+        for (int j = 1; j <= h; j++)
+        {
+            for (int k = 1; k <= w; k++)
+            {
+                if (map8[j][k] == PERSON)
+                {
+                    shortest[i] = min(shortest[i], res[idx(j,k,0)]);
+                }
+
+                if (map7[j][k] == PERSON)
+                {
+                    shortest[i] = min(shortest[i], res[idx(j,k,w*h)]);
+                }
+            }
+        }
+
+        printf("shortest dist of exit %d is %d\n", exits[i], shortest[i]);
+    }
+
+    // binary search for time
+    // it is a little difficult to directly calculate
+
+    int lo = 0, hi = w*h*2, ans = 2e9;
+
+    while (lo <= hi)
+    {
+        long long total = 0;
+        int mid = (lo + hi) / 2;
+        for (int t : shortest)
+        {
+            total += mid - t + 1;
+        }
+
+        if (total >= peoplecnt)
+        {
+            ans = mid;
+            hi = mid - 1;
+        }
+        else
+        {
+            lo = mid + 1;
+        }
+    }
+
+    printf("%d unit time(s) needed\n", ans);
 
     return 0;
 }
