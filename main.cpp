@@ -121,7 +121,7 @@ void setExit (string filename, int off)
             printf("(%d,%d)\n",x,y);
             exits.push_back(idx7);
             percentage.push_back(percent);
-			exitdist.push_back(dist);
+            exitdist.push_back(dist);
         }
     }
 }
@@ -185,6 +185,20 @@ int main () {
         printf("shortest dist of exit %d is %d\n", exits[i], shortest[i]);
     }
 
+    int presum = 0;
+    int pretime = 0;
+
+    for (size_t i = 0; i < exits.size(); i++)
+    {
+        if (percentage[i] == -1) continue;
+
+        presum += peoplecnt * percentage[i];
+        pretime = max(pretime, peoplecnt * percentage[i] / 100 + shortest[i] - 1);
+
+        while ((pretime - shortest[i] + 1) * 100 < peoplecnt * percentage[i])
+            ++pretime;
+    }
+
     // binary search for time
     // it is a little difficult to directly calculate
 
@@ -200,15 +214,10 @@ int main () {
         {
             int t = shortest[i];
             if (percentage[i] == -1) total += (mid - t + 1) * 100;
-            else if ((mid - t + 1) * 100 < peoplecnt * percentage[i])
-            {
-                total = -1;
-                break;
-            }
-            else total += peoplecnt * percentage[i];
+            else continue;
         }
 
-        if (total >= peoplecnt * 100)
+        if (total >= peoplecnt * 100 - presum)
         {
             ans = mid;
             hi = mid - 1;
@@ -219,7 +228,20 @@ int main () {
         }
     }
 
-    printf("%d unit time(s) needed\n", ans);
+    printf("%d unit time(s) needed\n\n", max(ans, pretime));
+
+    for (size_t i = 0; i < exits.size(); i++)
+    {
+        printf("people count of exit %d: ", exits[i]);
+        if (percentage[i] != -1)
+        {
+            printf("%d\n", peoplecnt * percentage[i] / 100);
+        }
+        else
+        {
+            printf("%d\n", ans - shortest[i] + 1);
+        }
+    }
 
     return 0;
 }
