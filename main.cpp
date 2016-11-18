@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <fstream>
 #include <vector>
+#include <numeric>
+#include <algorithm>
 #include "dijkstra.h"
 using namespace std;
 
@@ -10,7 +12,7 @@ const int height = 500; // height of map
 int map8 [height][width], map7[height][width];
 int h, w; // 직사각형 꼴의 map이 입력된다고 가정하고 map의 실제 h와 w를 readTextMap에서 계산
 vector<pair<int,int> > g[width*height*2]; // graph
-vector<int> exits, shortest;
+vector<int> exits, shortest, percentage;
 int peoplecnt;
 
 const int WALL = 0;
@@ -104,6 +106,25 @@ void setStair (string fileName, int off) {
         file.close();
     }
 }
+// set exits
+// @param filename
+void setExit (string filename, int off)
+{
+    string line;
+    ifstream file (filename);
+    if (file.is_open()) {
+        getline(file,line); // throw dummy line away
+        int x, y, percent;
+        cout << " index of exits : " << endl;
+        while ( file >> x >> y >> percent ) {
+            int idx7 = idx(y,x,off);
+            printf("(%d,%d)\n",x,y);
+            exits.push_back(idx7);
+            percentage.push_back(percent);
+        }
+    }
+}
+
 int main () {
     cout << " - read 8th.txt - " << endl;
     readTextMap(map8, "8th.txt");
@@ -123,24 +144,25 @@ int main () {
     setGraph(map7, offset);
     cout << " - build edges of stairs - " << endl;
     setStair("stair.txt", offset);
+    setExit("exit.txt", offset);
 
-    // assume the staris of 7th floor are exits
-    for (int i = 1; i <= h; i++)
+    if (exits.empty())
     {
-        for (int j = 1; j <= w; j++)
-        {
-            if (map7[i][j] == STAIRS)
-            {
-                exits.push_back(idx(i,j,w*h));
-            }
-        }
+        printf("fatal error: no exit.txt or parse failed\n");
+        exit(0);
+    }
+
+    if (accumulate(percentage.begin(), percentage.end(), 0, [](int a,int b){return max(a,0) + max(b,0);}) > 100)
+    {
+        printf("fatal error: sum of percentage is greater than 100\n");
+        exit(0);
     }
 
     shortest.resize(exits.size(), 2e9);
 
     printf("the number of people: %d\n", peoplecnt);
 
-    for (int i = 0; i < exits.size(); i++)
+    for (size_t i = 0; i < exits.size(); i++)
     {
         auto res = dijkstra(g, w*h*2, exits[i]);
         for (int j = 1; j <= h; j++)
@@ -171,12 +193,21 @@ int main () {
     {
         long long total = 0;
         int mid = (lo + hi) / 2;
-        for (int t : shortest)
+
+        // When summing, multiply by 100 so that percentage values can be calculated correctly
+        for (size_t i = 0; i < exits.size(); i++)
         {
-            total += mid - t + 1;
+            int t = shortest[i];
+            if (percentage[i] == -1) total += (mid - t + 1) * 100;
+            else if ((mid - t + 1) * 100 < peoplecnt * percentage[i])
+            {
+                total = -1;
+                break;
+            }
+            else total += peoplecnt * percentage[i];
         }
 
-        if (total >= peoplecnt)
+        if (total >= peoplecnt * 100)
         {
             ans = mid;
             hi = mid - 1;
