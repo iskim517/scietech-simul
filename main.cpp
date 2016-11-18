@@ -12,7 +12,7 @@ const int height = 500; // height of map
 int map8 [height][width], map7[height][width];
 int h, w; // 직사각형 꼴의 map이 입력된다고 가정하고 map의 실제 h와 w를 readTextMap에서 계산
 vector<pair<int,int> > g[width*height*2]; // graph
-vector<int> exits, shortest, percentage;
+vector<int> exits, shortest, percentage, exitdist;
 int peoplecnt;
 
 const int WALL = 0;
@@ -114,13 +114,14 @@ void setExit (string filename, int off)
     ifstream file (filename);
     if (file.is_open()) {
         getline(file,line); // throw dummy line away
-        int x, y, percent;
+        int x, y, dist, percent;
         cout << " index of exits : " << endl;
-        while ( file >> x >> y >> percent ) {
+        while ( file >> x >> y >> dist >> percent ) {
             int idx7 = idx(y,x,off);
             printf("(%d,%d)\n",x,y);
             exits.push_back(idx7);
             percentage.push_back(percent);
+			exitdist.push_back(dist);
         }
     }
 }
@@ -171,12 +172,12 @@ int main () {
             {
                 if (map8[j][k] == PERSON)
                 {
-                    shortest[i] = min(shortest[i], res[idx(j,k,0)]);
+                    shortest[i] = min(shortest[i], res[idx(j,k,0)]) + exitdist[i];
                 }
 
                 if (map7[j][k] == PERSON)
                 {
-                    shortest[i] = min(shortest[i], res[idx(j,k,w*h)]);
+                    shortest[i] = min(shortest[i], res[idx(j,k,w*h)]) + exitdist[i];
                 }
             }
         }
