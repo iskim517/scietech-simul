@@ -1,6 +1,6 @@
-// exit coordinate, percentage of people using it (-1 if auto calc)
-123 9 -1
-115 15 -1
-115 17 -1
-22 24 -1
-166 26 -1
+// exit coordinate, time, percentage of people using it (-1 if auto calc)
+123 9 248 -1
+115 15 126 33
+115 17 270 33
+22 24 216 -1
+166 26 302 -1
